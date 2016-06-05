@@ -11,6 +11,20 @@ public class Earth : MonoBehaviour {
     private List<Node> nodes = new List<Node>();
     private List<bool> bs = new List<bool>();
     private List<float> fs = new List<float>();
+    public Material mat;
+
+    public List<Item> items = new List<Item>();
+    public Item[] itemsArray;
+
+    public Transform destination;
+
+    public float brainTimer;
+    public float brainTimerMin = 0;
+    public float brainTimerMax = 2;
+
+    public bool generateCode;
+
+    public Material headMat;
 
     struct Node
     {
@@ -20,6 +34,8 @@ public class Earth : MonoBehaviour {
     }
 
 	void Start () {
+        if(generateCode)
+            GenerateCode();
         MakeCreature();
         SetCreature();
     }
@@ -31,6 +47,16 @@ public class Earth : MonoBehaviour {
         {
             Node node = new Node();
             node.part = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            if (i == 0)
+            {
+                node.part.tag = "head";
+                if(mat!=null)
+                    node.part.GetComponent<Renderer>().material = headMat;
+            }
+            else
+            {
+                node.part.GetComponent<Renderer>().material = mat;
+            }
             node.part.AddComponent<Rigidbody>();
             node.part.GetComponent<Rigidbody>().useGravity = false;
             //node.part.GetComponent<Rigidbody>().isKinematic = true;
@@ -84,7 +110,6 @@ public class Earth : MonoBehaviour {
             nodes[i].part.AddComponent<CharacterJoint>();
             nodes[i].part.GetComponent<CharacterJoint>().connectedBody = nodes[i + 1].part.GetComponent<Rigidbody>();
         }
-
     }
 	
 	void Update () {
@@ -94,11 +119,14 @@ public class Earth : MonoBehaviour {
             //MakeCreature();
             timeCount = 0;
         }
-	}
+
+        if (nodes.Count > 0)
+            CalculateHead();
+    }
 
     void FixedUpdate()
     {
-        for (int i = 0; i < nodes.Count; i++) {
+        for (int i = 1; i < nodes.Count; i++) {
             if (bs[i] == false)
             {
                 if (fs[i] > -nodes[i].angle)
@@ -122,6 +150,94 @@ public class Earth : MonoBehaviour {
                         bs[i] = false;
                     }
                 }
+            }
+        }
+
+        if (nodes.Count>0 && destination!=null)
+        MoveHead();
+    }
+
+    void CalculateHead()
+    {
+        for (int i = 0; i < itemsArray.Length; i++)
+        {
+            if(Vector3.Distance(itemsArray[i].transform.position, nodes[0].part.transform.position) < 50f && itemsArray[i].gameObject.activeSelf)
+            {
+                if (!items.Contains(itemsArray[i]))
+                {
+                    items.Add(itemsArray[i]);
+                }
+            }
+            else
+            {
+                if (items.Contains(itemsArray[i]))
+                {
+                    items.Remove(itemsArray[i]);
+                    if (items.Count == 0)
+                        destination = null;
+                }
+            }
+        }
+        float minDist = 1000.0f;
+        foreach(var i in items)
+        {
+            if(Vector3.Distance(i.transform.position, nodes[0].part.transform.position) < minDist)
+            {
+                minDist = Vector3.Distance(i.transform.position, nodes[0].part.transform.position);
+                destination = i.transform;
+            }
+        }
+
+
+    }
+
+    void MoveHead()
+    {
+        brainTimer += Time.deltaTime;
+        if (brainTimer > Random.Range(brainTimerMin, brainTimerMax))
+        {
+            Vector3 direction = (destination.position - nodes[0].part.transform.position).normalized;
+            nodes[0].part.GetComponent<Rigidbody>().AddForce(direction, ForceMode.Impulse);
+            brainTimer = 0;
+        }
+    }
+
+    void GenerateCode()
+    {
+        code = "";
+        int max = Random.Range(3, 16);
+        for (int i = 0; i < max; i+=3)
+        {
+            if (Random.Range(0.0f,1.0f) > 0.5f)
+            {
+                code += 'L';
+            }
+            else
+            {
+                code += 'B';
+            }
+
+            float value = Random.Range(0.0f, 1.0f);
+            if (value > 0.33f)
+            {
+                code += 'U';
+            }
+            else if (value > 0.66f)
+            {
+                code += 'R';
+            }
+            else
+            {
+                code += 'F';
+            }
+
+            if (Random.Range(0.0f, 1.0f) > 0.5f)
+            {
+                code += 'I';
+            }
+            else
+            {
+                code += 'T';
             }
         }
     }
