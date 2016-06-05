@@ -31,6 +31,7 @@ public class Earth : MonoBehaviour {
         public GameObject part;
         public int angle;
         public Vector3 axe;
+        public int numberFriend;
     }
 
 	void Start () {
@@ -43,7 +44,7 @@ public class Earth : MonoBehaviour {
     void MakeCreature()
     {
         //Destroy(creature);
-        for (int i = 0; i <= code.Length-3; i+=3)
+        for (int i = 0; i <= code.Length-4; i+=4)
         {
             Node node = new Node();
             node.part = GameObject.CreatePrimitive(PrimitiveType.Capsule);
@@ -88,13 +89,21 @@ public class Earth : MonoBehaviour {
             switch (code[i + 2])
             {
                 case 'I':
-                    node.angle = 180;
+                    node.angle = 90;
                     break;
                 case 'T':
-                    node.angle = 90;
+                    node.angle = 45;
                     break;
                 default:
                     break;
+            }
+            if(int.Parse(code[i + 3].ToString()) < i / 4)
+            {
+                node.numberFriend = int.Parse(code[i + 3].ToString());
+            }
+            else
+            {
+                node.numberFriend = nodes.Count - 1; ;
             }
             nodes.Add(node);
             fs.Add(0.0f);
@@ -104,11 +113,13 @@ public class Earth : MonoBehaviour {
 
     void SetCreature()
     {
-        for (int i = 0; i < nodes.Count-1; i++)
+        for (int i = 1; i < nodes.Count; i++)
         {
-            nodes[i + 1].part.transform.Translate(new Vector3(0, nodes[i].part.transform.position.y + nodes[i].part.transform.localScale.y + nodes[i+1].part.transform.localScale.y -0.5f));
+            nodes[i].part.transform.Translate(new Vector3(0, nodes[nodes[i].numberFriend].part.transform.position.y + nodes[nodes[i].numberFriend].part.transform.localScale.y + nodes[i].part.transform.localScale.y -0.5f));
             nodes[i].part.AddComponent<CharacterJoint>();
-            nodes[i].part.GetComponent<CharacterJoint>().connectedBody = nodes[i + 1].part.GetComponent<Rigidbody>();
+            nodes[i].part.GetComponent<CharacterJoint>().anchor = new Vector3(0, -1, 0);
+            nodes[i].part.GetComponent<CharacterJoint>().axis = new Vector3(-1, 0, 0);
+            nodes[i].part.GetComponent<CharacterJoint>().connectedBody = nodes[nodes[i].numberFriend].part.GetComponent<Rigidbody>();
         }
     }
 	
@@ -132,7 +143,7 @@ public class Earth : MonoBehaviour {
                 if (fs[i] > -nodes[i].angle)
                 {
                     fs[i]--;
-                    nodes[i].part.transform.Rotate(nodes[i].axe, Time.deltaTime * -200);
+                    nodes[i].part.transform.Rotate(nodes[i].axe, Time.deltaTime * -50);
                     if (fs[i] <= -nodes[i].angle)
                     {
                         bs[i] = true;
@@ -144,7 +155,7 @@ public class Earth : MonoBehaviour {
                 if (fs[i] < nodes[i].angle)
                 {
                     fs[i]++;
-                    nodes[i].part.transform.Rotate(nodes[i].axe, Time.deltaTime * 200);
+                    nodes[i].part.transform.Rotate(nodes[i].axe, Time.deltaTime * 50);
                     if (fs[i] >= nodes[i].angle)
                     {
                         bs[i] = false;
@@ -187,8 +198,6 @@ public class Earth : MonoBehaviour {
                 destination = i.transform;
             }
         }
-
-
     }
 
     void MoveHead()
@@ -200,13 +209,15 @@ public class Earth : MonoBehaviour {
             nodes[0].part.GetComponent<Rigidbody>().AddForce(direction, ForceMode.Impulse);
             brainTimer = 0;
         }
+
+        Camera.main.transform.LookAt(nodes[0].part.transform);
     }
 
     void GenerateCode()
     {
         code = "";
-        int max = Random.Range(3, 16);
-        for (int i = 0; i < max; i+=3)
+        int max = Random.Range(4, 25);
+        for (int i = 0; i < max; i+=4)
         {
             if (Random.Range(0.0f,1.0f) > 0.5f)
             {
@@ -239,17 +250,7 @@ public class Earth : MonoBehaviour {
             {
                 code += 'T';
             }
+                code += Random.Range(0,i/4);
         }
     }
-
-
-    /*case 'E':
-    GameObject eye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-    eye.GetComponent<Collider>().isTrigger = true;
-    eye.GetComponent<Renderer>().enabled = false;
-    eye.transform.parent = creature.transform;
-    eye.AddComponent<FixedJoint>();
-    eye.GetComponent<FixedJoint>().connectedBody = creature.GetComponent<Rigidbody>();
-    break;
-    */
 }
