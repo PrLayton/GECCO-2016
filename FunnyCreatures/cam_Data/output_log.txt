@@ -1,0 +1,40 @@
+Initialize engine version: 5.4.0b16 (75fd7cf4c4a2)
+GfxDevice: creating device client; threaded=1
+Direct3D:
+    Version:  Direct3D 11.0 [level 10.1]
+    Renderer: Intel(R) HD Graphics 3000 (ID=0x116)
+    Vendor:   Intel
+    VRAM:     848 MB
+Begin MonoManager ReloadAssembly
+Platform assembly: C:\Users\Tristan\Documents\GECCO-2016\FunnyCreatures\cam_Data\Managed\UnityEngine.dll (this message is harmless)
+Loading C:\Users\Tristan\Documents\GECCO-2016\FunnyCreatures\cam_Data\Managed\UnityEngine.dll into Unity Child Domain
+Platform assembly: C:\Users\Tristan\Documents\GECCO-2016\FunnyCreatures\cam_Data\Managed\Assembly-CSharp-firstpass.dll (this message is harmless)
+Loading C:\Users\Tristan\Documents\GECCO-2016\FunnyCreatures\cam_Data\Managed\Assembly-CSharp-firstpass.dll into Unity Child Domain
+Platform assembly: C:\Users\Tristan\Documents\GECCO-2016\FunnyCreatures\cam_Data\Managed\Assembly-CSharp.dll (this message is harmless)
+Loading C:\Users\Tristan\Documents\GECCO-2016\FunnyCreatures\cam_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
+Platform assembly: C:\Users\Tristan\Documents\GECCO-2016\FunnyCreatures\cam_Data\Managed\UnityEngine.UI.dll (this message is harmless)
+Loading C:\Users\Tristan\Documents\GECCO-2016\FunnyCreatures\cam_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
+Platform assembly: C:\Users\Tristan\Documents\GECCO-2016\FunnyCreatures\cam_Data\Managed\UnityEngine.Networking.dll (this message is harmless)
+Loading C:\Users\Tristan\Documents\GECCO-2016\FunnyCreatures\cam_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
+- Completed reload, in  0.620 seconds
+Platform assembly: C:\Users\Tristan\Documents\GECCO-2016\FunnyCreatures\cam_Data\Managed\System.Core.dll (this message is harmless)
+Platform assembly: C:\Users\Tristan\Documents\GECCO-2016\FunnyCreatures\cam_Data\Managed\System.dll (this message is harmless)
+desktop: 1366x768 60Hz; virtual: 1366x768 at 0,0
+<RI> Initializing input.
+<RI> Input initialized.
+<RI> Initialized touch support.
+UnloadTime: 1.117836 ms
+Setting up 1 worker threads for Enlighten.
+  Thread -> id: 1320 -> priority: 1 
+Unloading 4 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 26.819946 ms
+
+Unloading 3 unused Assets to reduce memory usage. Loaded Objects now: 557.
+Total: 1.167869 ms (FindLiveObjects: 0.150099 ms CreateObjectMapping: 0.096217 ms MarkObjects: 0.899315 ms  DeleteObjects: 0.020954 ms)
+
+Unloading 3 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 4.336213 ms
+
+Unloading 2 unused Assets to reduce memory usage. Loaded Objects now: 557.
+Total: 1.081059 ms (FindLiveObjects: 0.092369 ms CreateObjectMapping: 0.062862 ms MarkObjects: 0.905729 ms  DeleteObjects: 0.017960 ms)
+

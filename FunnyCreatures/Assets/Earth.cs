@@ -216,7 +216,7 @@ public class Earth : MonoBehaviour {
     void GenerateCode()
     {
         code = "";
-        int max = Random.Range(4, 25);
+        int max = Random.Range(4, 41);
         for (int i = 0; i < max; i+=4)
         {
             if (Random.Range(0.0f,1.0f) > 0.5f)
@@ -252,5 +252,73 @@ public class Earth : MonoBehaviour {
             }
                 code += Random.Range(0,i/4);
         }
+    }
+
+    public string Mutate(string adn,int nbMutation)
+    {
+        char[] newDna = adn.ToCharArray();
+
+        for(int i = 0; i < nbMutation; i ++)
+        {
+            int posrdm = Random.Range(0, newDna.Length);
+
+            //mutation du gène en fonction de la position
+            //Mutation du membre auquel est rataché
+            if(posrdm%4 == 0)
+            {
+                int rdm = Random.Range(0, newDna.Length%4);
+                newDna[posrdm] = (char)rdm;
+            }
+            //Muration de la taille
+            else if (posrdm%4 == 1)
+            {
+                if (newDna[posrdm] == 'B')
+                {
+                    newDna[posrdm] = 'L';
+                }
+                else
+                {
+                    newDna[posrdm] = 'B';
+                }
+            }
+            //Mutation de la rotation
+            else if (posrdm%4 == 2)
+            {
+                bool ok = false;
+                while (!ok)
+                {
+                    float value = Random.Range(0.0f, 1.0f);
+                    if (value > 0.33f && newDna[posrdm] != 'U')
+                    {
+                        newDna[posrdm] = 'U';
+                        ok = true;
+                    }
+                    else if (value > 0.66f && newDna[posrdm] != 'R')
+                    {
+                        newDna[posrdm] = 'R';
+                        ok = true;
+                    }
+                    else if (newDna[posrdm] != 'F')
+                    {
+                        newDna[posrdm] = 'F';
+                        ok = true;
+                    }
+                }
+            }
+            //Mutation de l'angle
+            else if (posrdm % 4 == 3)
+            {
+                if (newDna[posrdm] == 'T')
+                {
+                    newDna[posrdm] = 'I';
+                }
+                else
+                {
+                    newDna[posrdm] = 'T';
+                }
+            }
+        }
+
+        return new string(newDna);
     }
 }
