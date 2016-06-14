@@ -25,6 +25,8 @@ public class Earth : MonoBehaviour {
     public bool generateCode;
 
     public Material headMat;
+    
+    public GameObject[] monstersArray;
 
     struct Node
     {
@@ -38,76 +40,92 @@ public class Earth : MonoBehaviour {
         if(generateCode)
             GenerateCode();
         MakeCreature();
-        SetCreature();
+        //SetCreature();
     }
 
     void MakeCreature()
     {
         //Destroy(creature);
-        for (int i = 0; i <= code.Length-4; i+=4)
+        for (int j = 0; j < monstersArray.Length; j++)
         {
-            Node node = new Node();
-            node.part = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            if (i == 0)
+            List<Node> nodes2 = new List<Node>();
+
+            for (int i = 0; i <= code.Length - 4; i += 4)
             {
-                node.part.tag = "head";
-                if(mat!=null)
-                    node.part.GetComponent<Renderer>().material = headMat;
+                Node node = new Node();
+                node.part = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                if (i == 0)
+                {
+                    node.part.tag = "head";
+                    if (mat != null)
+                        node.part.GetComponent<Renderer>().material = headMat;
+                }
+                else
+                {
+                    node.part.GetComponent<Renderer>().material = mat;
+                }
+                node.part.AddComponent<Rigidbody>();
+                node.part.GetComponent<Rigidbody>().useGravity = false;
+                //node.part.GetComponent<Rigidbody>().isKinematic = true;
+                switch (code[i])
+                {
+                    case 'L':
+                        node.part.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+                        break;
+                    case 'B':
+                        node.part.transform.localScale = new Vector3(1.0f, 2.0f, 1.0f);
+                        break;
+                    default:
+                        break;
+                }
+                switch (code[i + 1])
+                {
+                    case 'U':
+                        node.axe = new Vector3(0, 1, 0);
+                        break;
+                    case 'R':
+                        node.axe = new Vector3(1, 0, 0);
+                        break;
+                    case 'F':
+                        node.axe = new Vector3(0, 0, 1);
+                        break;
+                    default:
+                        break;
+                }
+                switch (code[i + 2])
+                {
+                    case 'I':
+                        node.angle = 90;
+                        break;
+                    case 'T':
+                        node.angle = 45;
+                        break;
+                    default:
+                        break;
+                }
+                if (int.Parse(code[i + 3].ToString()) < i / 4)
+                {
+                    node.numberFriend = int.Parse(code[i + 3].ToString());
+                }
+                else
+                {
+                    node.numberFriend = nodes2.Count - 1; ;
+                }
+                nodes2.Add(node);
+                fs.Add(0.0f);
+                bs.Add(false);
+                
             }
-            else
+            for (int h = 1; h < nodes2.Count; h++)
             {
-                node.part.GetComponent<Renderer>().material = mat;
+                nodes2[h].part.transform.Translate(new Vector3(0, nodes2[nodes2[h].numberFriend].part.transform.position.y + nodes2[nodes2[h].numberFriend].part.transform.localScale.y + nodes2[h].part.transform.localScale.y - 0.5f));
+                nodes2[h].part.AddComponent<CharacterJoint>();
+                nodes2[h].part.GetComponent<CharacterJoint>().anchor = new Vector3(0, -1, 0);
+                nodes2[h].part.GetComponent<CharacterJoint>().axis = new Vector3(-1, 0, 0);
+                nodes2[h].part.GetComponent<CharacterJoint>().connectedBody = nodes2[nodes2[h].numberFriend].part.GetComponent<Rigidbody>();
+
+                nodes2[h].part.transform.parent = monstersArray[j].transform;
             }
-            node.part.AddComponent<Rigidbody>();
-            node.part.GetComponent<Rigidbody>().useGravity = false;
-            //node.part.GetComponent<Rigidbody>().isKinematic = true;
-            switch (code[i])
-            {
-                case 'L':
-                    node.part.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-                    break;
-                case 'B':
-                    node.part.transform.localScale = new Vector3(1.0f, 2.0f, 1.0f);
-                    break;
-                default:
-                    break;
-            }
-            switch (code[i+1])
-            {
-                case 'U':
-                    node.axe = new Vector3(0, 1, 0);
-                    break;
-                case 'R':
-                    node.axe = new Vector3(1, 0, 0);
-                    break;
-                case 'F':
-                    node.axe = new Vector3(0, 0, 1);
-                    break;
-                default:
-                    break;
-            }
-            switch (code[i + 2])
-            {
-                case 'I':
-                    node.angle = 90;
-                    break;
-                case 'T':
-                    node.angle = 45;
-                    break;
-                default:
-                    break;
-            }
-            if(int.Parse(code[i + 3].ToString()) < i / 4)
-            {
-                node.numberFriend = int.Parse(code[i + 3].ToString());
-            }
-            else
-            {
-                node.numberFriend = nodes.Count - 1; ;
-            }
-            nodes.Add(node);
-            fs.Add(0.0f);
-            bs.Add(false);
         }
     }
 
