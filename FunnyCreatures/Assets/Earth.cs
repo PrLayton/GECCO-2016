@@ -136,7 +136,8 @@ public class Earth : MonoBehaviour {
             allnodes.Add(nodes2);
 
             if (generateCode)
-                GenerateCode();
+                code = Mutate(code, 5);
+            Debug.Log(code);
         }
     }
 
@@ -302,19 +303,26 @@ public class Earth : MonoBehaviour {
     {
         char[] newDna = adn.ToCharArray();
 
-        for(int i = 0; i < nbMutation; i ++)
+        //Debug.Log("-----");
+        for (int i = 0; i < nbMutation; i ++)
         {
             int posrdm = Random.Range(0, newDna.Length);
+            //Debug.Log(posrdm);
+            //Debug.Log((posrdm+1)%4);
 
             //mutation du gène en fonction de la position
             //Mutation du membre auquel est rataché
-            if(posrdm%4 == 0)
+            if (posrdm > 0 && (posrdm + 1)% 4 == 0)
             {
                 int rdm = Random.Range(0, newDna.Length%4);
-                newDna[posrdm] = (char)rdm;
+                if (rdm == 0)
+                    newDna[posrdm] = '0';
+                else
+                    newDna[posrdm] = (char)rdm;
+                //Debug.Log(newDna[posrdm]);
             }
             //Muration de la taille
-            else if (posrdm%4 == 1)
+            else if (posrdm == 0 || (posrdm > 4 && (posrdm + 1) % 4 == 1))
             {
                 if (newDna[posrdm] == 'B')
                 {
@@ -324,9 +332,10 @@ public class Earth : MonoBehaviour {
                 {
                     newDna[posrdm] = 'B';
                 }
+                //Debug.Log(newDna[posrdm]);
             }
             //Mutation de la rotation
-            else if (posrdm%4 == 2)
+            else if (posrdm == 1 || (posrdm > 4 && (posrdm + 1) % 4 == 2))
             {
                 bool ok = false;
                 while (!ok)
@@ -348,9 +357,10 @@ public class Earth : MonoBehaviour {
                         ok = true;
                     }
                 }
+                //Debug.Log(newDna[posrdm]);
             }
             //Mutation de l'angle
-            else if (posrdm % 4 == 3)
+            else if (posrdm == 2 || (posrdm > 4 && (posrdm + 1) % 4 == 3))
             {
                 if (newDna[posrdm] == 'T')
                 {
@@ -360,9 +370,14 @@ public class Earth : MonoBehaviour {
                 {
                     newDna[posrdm] = 'T';
                 }
+                //Debug.Log(newDna[posrdm]);
             }
+            //Debug.Log("+++++");
         }
-
-        return new string(newDna);
+        string final = new string(newDna);
+        //Debug.Log("final");
+        //Debug.Log(final);
+        //Debug.Log("cooldown");
+        return final;
     }
 }
