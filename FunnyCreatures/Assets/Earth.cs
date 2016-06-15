@@ -9,6 +9,7 @@ public class Earth : MonoBehaviour {
     public float respawnTime = 1.0f;
     private float timeCount;
     private List<Node> nodes = new List<Node>();
+    private List<List<Node>> allnodes = new List<List<Node>>();
     private List<bool> bs = new List<bool>();
     private List<float> fs = new List<float>();
     public Material mat;
@@ -59,10 +60,13 @@ public class Earth : MonoBehaviour {
                     node.part.tag = "head";
                     if (mat != null)
                         node.part.GetComponent<Renderer>().material = headMat;
+                    node.part.transform.parent = monstersArray[j].transform;
+                    node.part.transform.position = monstersArray[j].transform.position;
                 }
                 else
                 {
                     node.part.GetComponent<Renderer>().material = mat;
+                    node.part.transform.parent = monstersArray[j].transform;
                 }
                 node.part.AddComponent<Rigidbody>();
                 node.part.GetComponent<Rigidbody>().useGravity = false;
@@ -111,21 +115,28 @@ public class Earth : MonoBehaviour {
                 {
                     node.numberFriend = nodes2.Count - 1; ;
                 }
+                
+                if (i > 0)
+                {
+                    node.part.transform.position = nodes2[node.numberFriend].part.transform.position;
+                    //node.part.transform.Translate(new Vector3(0, nodes2[node.numberFriend].part.transform.position.y + nodes2[node.numberFriend].part.transform.localScale.y + node.part.transform.localScale.y - 0.5f));
+                    node.part.transform.position = nodes2[node.numberFriend].part.transform.position;
+                    node.part.transform.Translate(new Vector3(0, nodes2[node.numberFriend].part.transform.localScale.y));
+                    node.part.AddComponent<CharacterJoint>();
+                    node.part.GetComponent<CharacterJoint>().anchor = new Vector3(0, -1, 0);
+                    node.part.GetComponent<CharacterJoint>().axis = new Vector3(-1, 0, 0);
+                    node.part.GetComponent<CharacterJoint>().connectedBody = nodes2[node.numberFriend].part.GetComponent<Rigidbody>();
+                }
+
                 nodes2.Add(node);
                 fs.Add(0.0f);
                 bs.Add(false);
-                
-            }
-            for (int h = 1; h < nodes2.Count; h++)
-            {
-                nodes2[h].part.transform.Translate(new Vector3(0, nodes2[nodes2[h].numberFriend].part.transform.position.y + nodes2[nodes2[h].numberFriend].part.transform.localScale.y + nodes2[h].part.transform.localScale.y - 0.5f));
-                nodes2[h].part.AddComponent<CharacterJoint>();
-                nodes2[h].part.GetComponent<CharacterJoint>().anchor = new Vector3(0, -1, 0);
-                nodes2[h].part.GetComponent<CharacterJoint>().axis = new Vector3(-1, 0, 0);
-                nodes2[h].part.GetComponent<CharacterJoint>().connectedBody = nodes2[nodes2[h].numberFriend].part.GetComponent<Rigidbody>();
 
-                nodes2[h].part.transform.parent = monstersArray[j].transform;
             }
+            allnodes.Add(nodes2);
+
+            if (generateCode)
+                GenerateCode();
         }
     }
 
@@ -149,86 +160,100 @@ public class Earth : MonoBehaviour {
             timeCount = 0;
         }
 
-        if (nodes.Count > 0)
+        if (allnodes.Count > 0)
             CalculateHead();
     }
 
     void FixedUpdate()
     {
-        for (int i = 1; i < nodes.Count; i++) {
-            if (bs[i] == false)
+        for (int j = 0; j < allnodes.Count; ++j)
+        {
+            for (int i = 1; i < allnodes[j].Count; i++)
             {
-                if (fs[i] > -nodes[i].angle)
+                if (bs[i] == false)
                 {
-                    fs[i]--;
-                    nodes[i].part.transform.Rotate(nodes[i].axe, Time.deltaTime * -50);
-                    if (fs[i] <= -nodes[i].angle)
+                    if (fs[i] > -allnodes[j][i].angle)
                     {
-                        bs[i] = true;
+                        fs[i]--;
+                        allnodes[j][i].part.transform.Rotate(allnodes[j][i].axe, Time.deltaTime * -50);
+                        if (fs[i] <= -allnodes[j][i].angle)
+                        {
+                            bs[i] = true;
+                        }
+                    }
+                }
+                else
+                {
+                    if (fs[i] < allnodes[j][i].angle)
+                    {
+                        fs[i]++;
+                        allnodes[j][i].part.transform.Rotate(allnodes[j][i].axe, Time.deltaTime * 50);
+                        if (fs[i] >= allnodes[j][i].angle)
+                        {
+                            bs[i] = false;
+                        }
                     }
                 }
             }
-            else
-            {
-                if (fs[i] < nodes[i].angle)
-                {
-                    fs[i]++;
-                    nodes[i].part.transform.Rotate(nodes[i].axe, Time.deltaTime * 50);
-                    if (fs[i] >= nodes[i].angle)
-                    {
-                        bs[i] = false;
-                    }
-                }
-            }
-        }
 
-        if (nodes.Count>0 && destination!=null)
-        MoveHead();
+
+            if (allnodes[j].Count > 0 && destination != null)
+                MoveHead();
+        }
     }
 
     void CalculateHead()
     {
-        for (int i = 0; i < itemsArray.Length; i++)
+        for (int j = 0; j < allnodes.Count; j++)
         {
-            if(Vector3.Distance(itemsArray[i].transform.position, nodes[0].part.transform.position) < 50f && itemsArray[i].gameObject.activeSelf)
+            for (int i = 0; i < itemsArray.Length; i++)
             {
-                if (!items.Contains(itemsArray[i]))
+                if (Vector3.Distance(itemsArray[i].transform.position, allnodes[j][0].part.transform.position) < 50f && itemsArray[i].gameObject.activeSelf)
                 {
-                    items.Add(itemsArray[i]);
+                    if (!items.Contains(itemsArray[i]))
+                    {
+                        items.Add(itemsArray[i]);
+                    }
+                }
+                else
+                {
+                    if (items.Contains(itemsArray[i]))
+                    {
+                        items.Remove(itemsArray[i]);
+                        if (items.Count == 0)
+                            destination = null;
+                    }
                 }
             }
-            else
+            float minDist = 1000.0f;
+            foreach (var i in items)
             {
-                if (items.Contains(itemsArray[i]))
+                if (Vector3.Distance(i.transform.position, allnodes[j][0].part.transform.position) < minDist)
                 {
-                    items.Remove(itemsArray[i]);
-                    if (items.Count == 0)
-                        destination = null;
+                    minDist = Vector3.Distance(i.transform.position, allnodes[j][0].part.transform.position);
+                    destination = i.transform;
                 }
-            }
-        }
-        float minDist = 1000.0f;
-        foreach(var i in items)
-        {
-            if(Vector3.Distance(i.transform.position, nodes[0].part.transform.position) < minDist)
-            {
-                minDist = Vector3.Distance(i.transform.position, nodes[0].part.transform.position);
-                destination = i.transform;
             }
         }
     }
 
     void MoveHead()
     {
-        brainTimer += Time.deltaTime;
-        if (brainTimer > Random.Range(brainTimerMin, brainTimerMax))
+        for (int j = 0; j < allnodes.Count; j++)
         {
-            Vector3 direction = (destination.position - nodes[0].part.transform.position).normalized;
-            nodes[0].part.GetComponent<Rigidbody>().AddForce(direction, ForceMode.Impulse);
-            brainTimer = 0;
-        }
+            brainTimer += Time.deltaTime;
+            if (brainTimer > Random.Range(brainTimerMin, brainTimerMax))
+            {
+                for (int i = 0; i < monstersArray.Length; i++)
+                {
+                    Vector3 direction = (destination.position - allnodes[j][0].part.transform.position).normalized;
+                    allnodes[j][0].part.GetComponent<Rigidbody>().AddForce(direction, ForceMode.Impulse);
+                    brainTimer = 0;
+                }
+            }
 
-        Camera.main.transform.LookAt(nodes[0].part.transform);
+            Camera.main.transform.LookAt(allnodes[j][0].part.transform);
+        }
     }
 
     void GenerateCode()
@@ -270,6 +295,7 @@ public class Earth : MonoBehaviour {
             }
                 code += Random.Range(0,i/4);
         }
+        Debug.Log(code);
     }
 
     public string Mutate(string adn,int nbMutation)
