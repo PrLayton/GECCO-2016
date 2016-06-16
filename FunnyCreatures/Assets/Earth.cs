@@ -7,6 +7,7 @@ public class Earth : MonoBehaviour {
     public string code; // = "LUIBRLBFL"
     //private GameObject creature;
     public float respawnTime = 1.0f;
+    public int numberMutation = 5;
     private float timeCount;
     private List<Node> nodes = new List<Node>();
     private List<List<Node>> allnodes = new List<List<Node>>();
@@ -27,6 +28,7 @@ public class Earth : MonoBehaviour {
 
     public Material headMat;
     
+    private int nbGeneration;
     public GameObject[] monstersArray;
     private List<string> codes = new List<string>();
 
@@ -42,10 +44,9 @@ public class Earth : MonoBehaviour {
         if(generateCode)
             GenerateCode();
         MakeCreature();
+        nbGeneration = 1;
         //SetCreature();
 
-        //test
-        Cross(0, 1);
     }
 
     void MakeCreature()
@@ -125,7 +126,7 @@ public class Earth : MonoBehaviour {
                     node.part.transform.position = nodes2[node.numberFriend].part.transform.position;
                     //node.part.transform.Translate(new Vector3(0, nodes2[node.numberFriend].part.transform.position.y + nodes2[node.numberFriend].part.transform.localScale.y + node.part.transform.localScale.y - 0.5f));
                     node.part.transform.position = nodes2[node.numberFriend].part.transform.position;
-                    node.part.transform.Translate(new Vector3(0, nodes2[node.numberFriend].part.transform.localScale.y));
+                    node.part.transform.Translate(new Vector3(0, nodes2[node.numberFriend].part.transform.localScale.y + 0.5f));
                     node.part.AddComponent<CharacterJoint>();
                     node.part.GetComponent<CharacterJoint>().anchor = new Vector3(0, -1, 0);
                     node.part.GetComponent<CharacterJoint>().axis = new Vector3(-1, 0, 0);
@@ -140,7 +141,9 @@ public class Earth : MonoBehaviour {
             allnodes.Add(nodes2);
 
             if (generateCode)
-                code = Mutate(code, 5);
+                GenerateCode();
+            else
+                code = Mutate(code, numberMutation);
 
             codes.Add(code);
             Debug.Log(code);
@@ -164,6 +167,7 @@ public class Earth : MonoBehaviour {
         if(timeCount >= respawnTime)
         {
             //MakeCreature();
+            newGeneration();
             timeCount = 0;
         }
 
@@ -312,21 +316,16 @@ public class Earth : MonoBehaviour {
         for (int i = 0; i < nbMutation; i ++)
         {
             int posrdm = Random.Range(0, newDna.Length);
-            //Debug.Log(posrdm);
-            
             //mutation du gène en fonction de la position
             //Mutation du membre auquel est rataché
             if (posrdm > 0 && (posrdm + 1)% 4 == 0)
             {
                 int rdm = Random.Range(0, newDna.Length%4);
-
-
-
+                
                 if (rdm == 0)
                     newDna[posrdm] = '0';
                 else
                     newDna[posrdm] = (char)rdm;
-                //Debug.Log(newDna[posrdm]);
             }
             //Muration de la taille
             else if (posrdm == 0 || (posrdm > 4 && (posrdm + 1) % 4 == 1))
@@ -339,7 +338,6 @@ public class Earth : MonoBehaviour {
                 {
                     newDna[posrdm] = 'B';
                 }
-                //Debug.Log(newDna[posrdm]);
             }
             //Mutation de la rotation
             else if (posrdm == 1 || (posrdm > 4 && (posrdm + 1) % 4 == 2))
@@ -364,7 +362,6 @@ public class Earth : MonoBehaviour {
                         ok = true;
                     }
                 }
-                //Debug.Log(newDna[posrdm]);
             }
             //Mutation de l'angle
             else if (posrdm == 2 || (posrdm > 4 && (posrdm + 1) % 4 == 3))
@@ -377,29 +374,20 @@ public class Earth : MonoBehaviour {
                 {
                     newDna[posrdm] = 'T';
                 }
-                //Debug.Log(newDna[posrdm]);
             }
-            //Debug.Log("+++++");
         }
         string final = new string(newDna);
-        //Debug.Log("final");
-        //Debug.Log(final);
-        //Debug.Log("cooldown");
         return final;
     }
 
-
-    void Cross(int idPapa, int idMaman)
+    private List<string> Cross(int idPapa, int idMaman)
     {
+        List<string> parent = new List<string>();
         string papa = codes[idPapa];
         string maman = codes[idMaman];
 
         int lenghtPapa = papa.Length;
         int lenghtMaman = maman.Length;
-
-        Debug.Log("avant modif ");
-        Debug.Log(papa);
-        Debug.Log(maman);
 
         if (lenghtPapa < lenghtMaman)
         {
@@ -413,10 +401,9 @@ public class Earth : MonoBehaviour {
 
             papa += temp2;
             maman += temp;
-            
-            Debug.Log("papa");
-            Debug.Log(papa);
-            Debug.Log(maman);
+
+            parent.Add(papa);
+            parent.Add(maman);
         }
         else
         {
@@ -430,10 +417,38 @@ public class Earth : MonoBehaviour {
 
             papa += temp2;
             maman += temp;
-            
-            Debug.Log("maman");
-            Debug.Log(papa);
-            Debug.Log(maman);
+
+            parent.Add(papa);
+            parent.Add(maman);
         }
+
+        return parent;
     }
+
+
+    public void newGeneration()
+    {
+        List<string> newGen = new List<string>();
+
+        //faire condition pour prendre les 4 meilleurs et faire deux mélanges avec
+        newGen.AddRange(Cross(0, 1));
+        newGen.AddRange(Cross(2, 3));
+
+        //mutation des enfants
+        Mutate(newGen[0], numberMutation);
+        Mutate(newGen[1], numberMutation);
+        Mutate(newGen[2], numberMutation);
+        Mutate(newGen[3], numberMutation);
+
+        //ajouter les 4 parents dans codes
+        newGen.Add(codes[0]);
+        newGen.Add(codes[1]);
+        newGen.Add(codes[2]);
+        newGen.Add(codes[3]);
+
+        //mise a jour des individus
+        codes = newGen;
+    }
+
+
 }
