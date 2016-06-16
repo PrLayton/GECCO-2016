@@ -28,6 +28,7 @@ public class Earth : MonoBehaviour {
     public Material headMat;
     
     public GameObject[] monstersArray;
+    private List<string> codes = new List<string>();
 
     struct Node
     {
@@ -42,6 +43,9 @@ public class Earth : MonoBehaviour {
             GenerateCode();
         MakeCreature();
         //SetCreature();
+
+        //test
+        Cross(0, 1);
     }
 
     void MakeCreature()
@@ -137,6 +141,8 @@ public class Earth : MonoBehaviour {
 
             if (generateCode)
                 code = Mutate(code, 5);
+
+            codes.Add(code);
             Debug.Log(code);
         }
     }
@@ -302,19 +308,20 @@ public class Earth : MonoBehaviour {
     public string Mutate(string adn,int nbMutation)
     {
         char[] newDna = adn.ToCharArray();
-
-        //Debug.Log("-----");
+        
         for (int i = 0; i < nbMutation; i ++)
         {
             int posrdm = Random.Range(0, newDna.Length);
             //Debug.Log(posrdm);
-            //Debug.Log((posrdm+1)%4);
-
+            
             //mutation du gène en fonction de la position
             //Mutation du membre auquel est rataché
             if (posrdm > 0 && (posrdm + 1)% 4 == 0)
             {
                 int rdm = Random.Range(0, newDna.Length%4);
+
+
+
                 if (rdm == 0)
                     newDna[posrdm] = '0';
                 else
@@ -379,5 +386,54 @@ public class Earth : MonoBehaviour {
         //Debug.Log(final);
         //Debug.Log("cooldown");
         return final;
+    }
+
+
+    void Cross(int idPapa, int idMaman)
+    {
+        string papa = codes[idPapa];
+        string maman = codes[idMaman];
+
+        int lenghtPapa = papa.Length;
+        int lenghtMaman = maman.Length;
+
+        Debug.Log("avant modif ");
+        Debug.Log(papa);
+        Debug.Log(maman);
+
+        if (lenghtPapa < lenghtMaman)
+        {
+            int rdm = Random.Range(0, lenghtPapa);
+
+            string temp = papa.Substring(rdm);
+            string temp2 = maman.Substring(rdm);
+
+            papa = papa.Remove(rdm);
+            maman = maman.Remove(rdm);
+
+            papa += temp2;
+            maman += temp;
+            
+            Debug.Log("papa");
+            Debug.Log(papa);
+            Debug.Log(maman);
+        }
+        else
+        {
+            int rdm = Random.Range(0, lenghtMaman);
+
+            string temp = papa.Substring(rdm);
+            string temp2 = maman.Substring(rdm);
+
+            papa = papa.Remove(rdm);
+            maman = maman.Remove(rdm);
+
+            papa += temp2;
+            maman += temp;
+            
+            Debug.Log("maman");
+            Debug.Log(papa);
+            Debug.Log(maman);
+        }
     }
 }
