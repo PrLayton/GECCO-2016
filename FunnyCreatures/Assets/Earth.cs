@@ -9,13 +9,11 @@ public class Earth : MonoBehaviour {
     public float respawnTime = 1.0f;
     public int numberMutation = 5;
     private float timeCount;
-    private List<Node> nodes = new List<Node>();
     private List<List<Node>> allnodes = new List<List<Node>>();
     private List<bool> bs = new List<bool>();
     private List<float> fs = new List<float>();
     public Material mat;
 
-    public List<Item> items = new List<Item>();
     public Item[] itemsArray;
 
     public Transform destination;
@@ -51,6 +49,8 @@ public class Earth : MonoBehaviour {
         public string code;
         public float fitness;
         public Transform target;
+        public float brainTimer;
+        public List<Item> items;
     }
 
 
@@ -166,6 +166,7 @@ public class Earth : MonoBehaviour {
             creature.member = nodes2;
             creature.code = code;
             creature.id = 0;
+            creature.items = new List<Item>();
             monsters.Add(creature);
 
             codes.Add(code);
@@ -233,7 +234,7 @@ public class Earth : MonoBehaviour {
 
 
             if (monsters[j].member.Count > 0 && monsters[j].target != null)
-                MoveHead();
+                MoveHead(j);
         }
     }
 
@@ -245,17 +246,17 @@ public class Earth : MonoBehaviour {
             {
                 if (Vector3.Distance(itemsArray[i].transform.position, monsters[j].member[0].part.transform.position) < 50f && itemsArray[i].gameObject.activeSelf)
                 {
-                    if (!items.Contains(itemsArray[i]))
+                    if (!monsters[j].items.Contains(itemsArray[i]))
                     {
-                        items.Add(itemsArray[i]);
+                        monsters[j].items.Add(itemsArray[i]);
                     }
                 }
                 else
                 {
-                    if (items.Contains(itemsArray[i]))
+                    if (monsters[j].items.Contains(itemsArray[i]))
                     {
-                        items.Remove(itemsArray[i]);
-                        if (items.Count == 0)
+                        monsters[j].items.Remove(itemsArray[i]);
+                        if (monsters[j].items.Count == 0)
                         {
                             Creature crea = monsters[j];
                             crea.target = null;
@@ -267,12 +268,12 @@ public class Earth : MonoBehaviour {
             float minDist = 1000.0f;
             //foreach (var i in items)
             Creature c = monsters[j];
-            for(int i = 0; i < items.Count; i ++)
+            for(int i = 0; i < monsters[j].items.Count; i ++)
             {
-                if (Vector3.Distance(items[i].transform.position, monsters[j].member[0].part.transform.position) < minDist)
+                if (Vector3.Distance(monsters[j].items[i].transform.position, monsters[j].member[0].part.transform.position) < minDist)
                 {
-                    minDist = Vector3.Distance(items[i].transform.position, monsters[j].member[0].part.transform.position);
-                    c.target = items[i].transform;
+                    minDist = Vector3.Distance(monsters[j].items[i].transform.position, monsters[j].member[0].part.transform.position);
+                    c.target = monsters[j].items[i].transform;
                 }
             }
             if (j == 0)
@@ -281,31 +282,29 @@ public class Earth : MonoBehaviour {
         }
     }
 
-    void MoveHead()
+    void MoveHead(int j)
     {
-        for (int j = 0; j < monsters.Count; j++)
+        bool miam = false;
+        Creature crea = monsters[j];
+        crea.brainTimer += Time.deltaTime;
+        monsters[j] = crea;
+        if (monsters[j].brainTimer > Random.Range(brainTimerMin, brainTimerMax))
         {
-            bool miam = false;
-            brainTimer += Time.deltaTime;
-            if (brainTimer > Random.Range(brainTimerMin, brainTimerMax))
+            Vector3 direction = (monsters[j].target.position - monsters[j].member[0].part.transform.position).normalized;
+            monsters[j].member[0].part.GetComponent<Rigidbody>().AddForce(direction, ForceMode.Impulse);
+            crea = monsters[j];
+            crea.brainTimer = 0;
+            monsters[j] = crea;
+            if (!miam)
             {
-                for (int i = 0; i < monstersArray.Length; i++)
-                {
-                    Vector3 direction = (monsters[j].target.position - monsters[j].member[0].part.transform.position).normalized;
-                    monsters[j].member[0].part.GetComponent<Rigidbody>().AddForce(direction, ForceMode.Impulse);
-                    brainTimer = 0;
-                }
-                if (!miam)
-                {
-                    Creature c = monsters[j];
-                    c.fitness ++;
-                    monsters[j] = c;
-                }
+                Creature c = monsters[j];
+                c.fitness ++;
+                monsters[j] = c;
             }
-            debugFitness[j] = monsters[j].fitness;
-
-            Camera.main.transform.LookAt(monsters[j].member[0].part.transform);
         }
+        debugFitness[j] = monsters[j].fitness;
+
+        Camera.main.transform.LookAt(monsters[j].member[0].part.transform);
     }
 
     void GenerateCode()
