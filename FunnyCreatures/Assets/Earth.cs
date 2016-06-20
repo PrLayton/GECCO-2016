@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class Earth : MonoBehaviour {
 
-    public string code; // = "LUIBRLBFL"
+    public string code; // = "LUI0BRL0BFL0"
     //private GameObject creature;
     public float respawnTime = 1.0f;
     public int numberMutation = 5;
@@ -31,6 +31,10 @@ public class Earth : MonoBehaviour {
     private int nbGeneration;
     public GameObject[] monstersArray;
     private List<string> codes = new List<string>();
+    private List<Creature> monsters = new List<Creature>();
+
+
+    public float[] debugFitness;
 
     struct Node
     {
@@ -40,18 +44,29 @@ public class Earth : MonoBehaviour {
         public int numberFriend;
     }
 
-	void Start () {
+    struct Creature
+    {
+        public int id;
+        public List<Node> member;
+        public string code;
+        public float fitness;
+        public Transform target;
+    }
+
+
+    void Start () {
         if(generateCode)
             GenerateCode();
         MakeCreature();
         nbGeneration = 1;
         //SetCreature();
-
+        debugFitness = new float[8];
     }
 
     void MakeCreature()
     {
         //Destroy(creature);
+
         for (int j = 0; j < monstersArray.Length; j++)
         {
             List<Node> nodes2 = new List<Node>();
@@ -138,6 +153,7 @@ public class Earth : MonoBehaviour {
                 bs.Add(false);
 
             }
+
             allnodes.Add(nodes2);
 
             if (generateCode)
@@ -145,12 +161,19 @@ public class Earth : MonoBehaviour {
             else
                 code = Mutate(code, numberMutation);
 
+            Creature creature = new Creature();
+            creature.id = j;
+            creature.member = nodes2;
+            creature.code = code;
+            creature.id = 0;
+            monsters.Add(creature);
+
             codes.Add(code);
             Debug.Log(code);
         }
     }
 
-    void SetCreature()
+    /*void SetCreature()
     {
         for (int i = 1; i < nodes.Count; i++)
         {
@@ -161,7 +184,8 @@ public class Earth : MonoBehaviour {
             nodes[i].part.GetComponent<CharacterJoint>().connectedBody = nodes[nodes[i].numberFriend].part.GetComponent<Rigidbody>();
         }
     }
-	
+	*/
+
 	void Update () {
         timeCount += Time.deltaTime;
         if(timeCount >= respawnTime)
@@ -177,17 +201,17 @@ public class Earth : MonoBehaviour {
 
     void FixedUpdate()
     {
-        for (int j = 0; j < allnodes.Count; ++j)
+        for (int j = 0; j < monsters.Count; ++j)
         {
-            for (int i = 1; i < allnodes[j].Count; i++)
+            for (int i = 1; i < monsters[j].member.Count; i++)
             {
                 if (bs[i] == false)
                 {
-                    if (fs[i] > -allnodes[j][i].angle)
+                    if (fs[i] > -monsters[j].member[i].angle)
                     {
                         fs[i]--;
-                        allnodes[j][i].part.transform.Rotate(allnodes[j][i].axe, Time.deltaTime * -50);
-                        if (fs[i] <= -allnodes[j][i].angle)
+                        monsters[j].member[i].part.transform.Rotate(monsters[j].member[i].axe, Time.deltaTime * -50);
+                        if (fs[i] <= -monsters[j].member[i].angle)
                         {
                             bs[i] = true;
                         }
@@ -195,11 +219,11 @@ public class Earth : MonoBehaviour {
                 }
                 else
                 {
-                    if (fs[i] < allnodes[j][i].angle)
+                    if (fs[i] < monsters[j].member[i].angle)
                     {
                         fs[i]++;
-                        allnodes[j][i].part.transform.Rotate(allnodes[j][i].axe, Time.deltaTime * 50);
-                        if (fs[i] >= allnodes[j][i].angle)
+                        monsters[j].member[i].part.transform.Rotate(monsters[j].member[i].axe, Time.deltaTime * 50);
+                        if (fs[i] >= monsters[j].member[i].angle)
                         {
                             bs[i] = false;
                         }
@@ -208,18 +232,18 @@ public class Earth : MonoBehaviour {
             }
 
 
-            if (allnodes[j].Count > 0 && destination != null)
+            if (monsters[j].member.Count > 0 && monsters[j].target != null)
                 MoveHead();
         }
     }
 
     void CalculateHead()
     {
-        for (int j = 0; j < allnodes.Count; j++)
+        for (int j = 0; j < monsters.Count; j++)
         {
             for (int i = 0; i < itemsArray.Length; i++)
             {
-                if (Vector3.Distance(itemsArray[i].transform.position, allnodes[j][0].part.transform.position) < 50f && itemsArray[i].gameObject.activeSelf)
+                if (Vector3.Distance(itemsArray[i].transform.position, monsters[j].member[0].part.transform.position) < 50f && itemsArray[i].gameObject.activeSelf)
                 {
                     if (!items.Contains(itemsArray[i]))
                     {
@@ -232,38 +256,55 @@ public class Earth : MonoBehaviour {
                     {
                         items.Remove(itemsArray[i]);
                         if (items.Count == 0)
-                            destination = null;
+                        {
+                            Creature crea = monsters[j];
+                            crea.target = null;
+                            monsters[j] = crea;
+                        }
                     }
                 }
             }
             float minDist = 1000.0f;
-            foreach (var i in items)
+            //foreach (var i in items)
+            Creature c = monsters[j];
+            for(int i = 0; i < items.Count; i ++)
             {
-                if (Vector3.Distance(i.transform.position, allnodes[j][0].part.transform.position) < minDist)
+                if (Vector3.Distance(items[i].transform.position, monsters[j].member[0].part.transform.position) < minDist)
                 {
-                    minDist = Vector3.Distance(i.transform.position, allnodes[j][0].part.transform.position);
-                    destination = i.transform;
+                    minDist = Vector3.Distance(items[i].transform.position, monsters[j].member[0].part.transform.position);
+                    c.target = items[i].transform;
                 }
             }
+            if (j == 0)
+                destination = c.target;
+            monsters[j] = c;
         }
     }
 
     void MoveHead()
     {
-        for (int j = 0; j < allnodes.Count; j++)
+        for (int j = 0; j < monsters.Count; j++)
         {
+            bool miam = false;
             brainTimer += Time.deltaTime;
             if (brainTimer > Random.Range(brainTimerMin, brainTimerMax))
             {
                 for (int i = 0; i < monstersArray.Length; i++)
                 {
-                    Vector3 direction = (destination.position - allnodes[j][0].part.transform.position).normalized;
-                    allnodes[j][0].part.GetComponent<Rigidbody>().AddForce(direction, ForceMode.Impulse);
+                    Vector3 direction = (monsters[j].target.position - monsters[j].member[0].part.transform.position).normalized;
+                    monsters[j].member[0].part.GetComponent<Rigidbody>().AddForce(direction, ForceMode.Impulse);
                     brainTimer = 0;
                 }
+                if (!miam)
+                {
+                    Creature c = monsters[j];
+                    c.fitness ++;
+                    monsters[j] = c;
+                }
             }
+            debugFitness[j] = monsters[j].fitness;
 
-            Camera.main.transform.LookAt(allnodes[j][0].part.transform);
+            Camera.main.transform.LookAt(monsters[j].member[0].part.transform);
         }
     }
 
@@ -306,6 +347,7 @@ public class Earth : MonoBehaviour {
             }
                 code += Random.Range(0,i/4);
         }
+
         Debug.Log(code);
     }
 
@@ -425,14 +467,34 @@ public class Earth : MonoBehaviour {
         return parent;
     }
 
-
     public void newGeneration()
     {
         List<string> newGen = new List<string>();
+        List<int> ids = new List<int>();
+        ids.Add(0); ids.Add(0); ids.Add(0); ids.Add(0);
 
         //faire condition pour prendre les 4 meilleurs et faire deux mélanges avec
+        for (int i = 0; i < monsters.Count; i ++)
+        {
+            int val = 0;
+            for(int j = 0; j < monsters.Count; j++)
+            {
+                if (monsters[i].fitness > monsters[j].fitness && i != j)
+                {
+                    val++;
+                }
+            }
+            if(val<3)
+                ids[val] = i;
+        }
+
+
         newGen.AddRange(Cross(0, 1));
         newGen.AddRange(Cross(2, 3));
+
+        /*
+        newGen.AddRange(Cross(ids[0], ids[2]));
+        newGen.AddRange(Cross(ids[1], ids[3]));*/
 
         //mutation des enfants
         Mutate(newGen[0], numberMutation);
@@ -441,10 +503,10 @@ public class Earth : MonoBehaviour {
         Mutate(newGen[3], numberMutation);
 
         //ajouter les 4 parents dans codes
-        newGen.Add(codes[0]);
-        newGen.Add(codes[1]);
-        newGen.Add(codes[2]);
-        newGen.Add(codes[3]);
+        newGen.Add(monsters[0].code);
+        newGen.Add(monsters[1].code);
+        newGen.Add(monsters[2].code);
+        newGen.Add(monsters[3].code);
 
         //mise a jour des individus
         codes = newGen;
