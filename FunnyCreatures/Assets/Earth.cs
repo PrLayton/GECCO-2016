@@ -34,6 +34,9 @@ public class Earth : MonoBehaviour {
 
     public float[] debugFitness;
 
+    public int minPart=1;
+    public int maxPart=5;
+
     struct Node
     {
         public GameObject part;
@@ -310,10 +313,10 @@ public class Earth : MonoBehaviour {
     void GenerateCode()
     {
         code = "";
-        int max = Random.Range(4, 41);
+        int max = Random.Range(minPart*4, (maxPart*4)+1);
         for (int i = 0; i < max; i+=4)
         {
-            if (Random.Range(0.0f,1.0f) > 0.5f)
+            if (Random.Range(0.0f,1.0f) >= 0.5f)
             {
                 code += 'L';
             }
