@@ -26,6 +26,9 @@ public class Earth : MonoBehaviour {
 
     public Material headMat;
 
+    public int minPart=1;
+    public int maxPart=5;
+
     struct Node
     {
         public GameObject part;
@@ -143,7 +146,7 @@ public class Earth : MonoBehaviour {
                 if (fs[i] > -nodes[i].angle)
                 {
                     fs[i]--;
-                    nodes[i].part.transform.Rotate(nodes[i].axe, Time.deltaTime * -50);
+                    nodes[i].part.transform.Rotate(nodes[i].axe, Time.deltaTime * -25);
                     if (fs[i] <= -nodes[i].angle)
                     {
                         bs[i] = true;
@@ -155,7 +158,7 @@ public class Earth : MonoBehaviour {
                 if (fs[i] < nodes[i].angle)
                 {
                     fs[i]++;
-                    nodes[i].part.transform.Rotate(nodes[i].axe, Time.deltaTime * 50);
+                    nodes[i].part.transform.Rotate(nodes[i].axe, Time.deltaTime * 25);
                     if (fs[i] >= nodes[i].angle)
                     {
                         bs[i] = false;
@@ -216,10 +219,10 @@ public class Earth : MonoBehaviour {
     void GenerateCode()
     {
         code = "";
-        int max = Random.Range(4, 25);
+        int max = Random.Range(minPart*4, (maxPart*4)+1);
         for (int i = 0; i < max; i+=4)
         {
-            if (Random.Range(0.0f,1.0f) > 0.5f)
+            if (Random.Range(0.0f,1.0f) >= 0.5f)
             {
                 code += 'L';
             }
