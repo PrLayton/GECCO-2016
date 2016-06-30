@@ -12,12 +12,12 @@ public class Item : MonoBehaviour
     [SerializeField]
     Earth earth;
 
-    Transform startPosition;
+    Vector3 startPosition;
 
     // Use this for initialization
     void Start()
     {
-        startPosition = transform;
+        startPosition = transform.position;
     }
 
     // Update is called once per frame
@@ -53,6 +53,7 @@ public class Item : MonoBehaviour
                 actived = false;
                 GetComponent<MeshRenderer>().enabled = false;
                 GetComponent<SphereCollider>().enabled = false;
+                GetComponent<Rigidbody>().useGravity = false;
                 StartCoroutine(Respawn());
             }
         }
@@ -62,10 +63,11 @@ public class Item : MonoBehaviour
     {
        // gameObject.SetActive(false);
         yield return new WaitForSeconds(5.0f);
+        transform.position = new Vector3(startPosition.x + Random.Range(-5.0f, 5.0f), startPosition.y, startPosition.z + Random.Range(-5.0f, 5.0f));
         GetComponent<SphereCollider>().enabled = true;
         GetComponent<MeshRenderer>().enabled = true;
-        transform.position = startPosition.position;
-        transform.rotation = startPosition.rotation;
+        GetComponent<Rigidbody>().useGravity = true;
+        GetComponent<Rigidbody>().velocity = Vector3.zero;
         actived = true;
         //gameObject.SetActive(true);
     }
