@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -31,8 +32,8 @@ public class Earth : MonoBehaviour {
     private List<string> codes = new List<string>();
     private List<Creature> monsters = new List<Creature>();
 
-
-    public float[] debugFitness;
+    public Text nombreMutation;
+    public Text[] textFitness;
 
     public int minPart=1;
     public int maxPart=5;
@@ -63,7 +64,6 @@ public class Earth : MonoBehaviour {
         MakeCreature();
         nbGeneration = 1;
         //SetCreature();
-        debugFitness = new float[8];
     }
 
     void MakeCreature()
@@ -194,8 +194,10 @@ public class Earth : MonoBehaviour {
         timeCount += Time.deltaTime;
         if(timeCount >= respawnTime)
         {
+            numberMutation = int.Parse(nombreMutation.text);
             //MakeCreature();
             newGeneration();
+            
             timeCount = 0;
         }
 
@@ -305,7 +307,7 @@ public class Earth : MonoBehaviour {
                 monsters[j] = c;
             }
         }
-        debugFitness[j] = monsters[j].fitness;
+        textFitness[j].text = monsters[j].fitness.ToString();
 
         Camera.main.transform.LookAt(monsters[j].member[0].part.transform);
     }
@@ -486,11 +488,11 @@ public class Earth : MonoBehaviour {
                     val++;
                 }
             }
-            if(val<3)
+            if(val<=3)
                 ids[val] = i;
         }
 
-
+        //créer les enfants
         newGen.AddRange(Cross(0, 1));
         newGen.AddRange(Cross(2, 3));
 
@@ -499,10 +501,10 @@ public class Earth : MonoBehaviour {
         newGen.AddRange(Cross(ids[1], ids[3]));*/
 
         //mutation des enfants
-        Mutate(newGen[0], numberMutation);
-        Mutate(newGen[1], numberMutation);
-        Mutate(newGen[2], numberMutation);
-        Mutate(newGen[3], numberMutation);
+        newGen[0] = Mutate(newGen[0], numberMutation);
+        newGen[1] = Mutate(newGen[1], numberMutation);
+        newGen[2] = Mutate(newGen[2], numberMutation);
+        newGen[3] = Mutate(newGen[3], numberMutation);
 
         //ajouter les 4 parents dans codes
         newGen.Add(monsters[0].code);
