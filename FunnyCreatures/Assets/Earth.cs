@@ -29,7 +29,7 @@ public class Earth : MonoBehaviour {
     private int nbGeneration;
     public GameObject[] monstersArray;
     private List<string> codes = new List<string>();
-    private List<Creature> monsters = new List<Creature>();
+    public List<Creature> monsters = new List<Creature>();
 
 
     public float[] debugFitness;
@@ -37,7 +37,7 @@ public class Earth : MonoBehaviour {
     public int minPart=1;
     public int maxPart=5;
 
-    struct Node
+    public struct Node
     {
         public GameObject part;
         public int angle;
@@ -45,7 +45,7 @@ public class Earth : MonoBehaviour {
         public int numberFriend;
     }
 
-    struct Creature
+    public struct Creature
     {
         public int id;
         public List<Node> member;
@@ -54,6 +54,7 @@ public class Earth : MonoBehaviour {
         public Transform target;
         public float brainTimer;
         public List<Item> items;
+        public bool miam;
     }
 
 
@@ -238,6 +239,21 @@ public class Earth : MonoBehaviour {
 
             if (monsters[j].member.Count > 0 && monsters[j].target != null)
                 MoveHead(j);
+
+            if (!monsters[j].miam)
+            {
+                Creature c = monsters[j];
+                c.fitness++;
+                monsters[j] = c;
+            }
+            else
+            {
+                Creature c = monsters[j];
+                c.miam = false;
+                c.fitness = 0;
+                monsters[j] = c;
+            }
+            debugFitness[j] = monsters[j].fitness;
         }
     }
 
@@ -287,7 +303,6 @@ public class Earth : MonoBehaviour {
 
     void MoveHead(int j)
     {
-        bool miam = false;
         Creature crea = monsters[j];
         crea.brainTimer += Time.deltaTime;
         monsters[j] = crea;
@@ -298,17 +313,12 @@ public class Earth : MonoBehaviour {
             crea = monsters[j];
             crea.brainTimer = 0;
             monsters[j] = crea;
-            if (!miam)
-            {
-                Creature c = monsters[j];
-                c.fitness ++;
-                monsters[j] = c;
-            }
+
         }
-        debugFitness[j] = monsters[j].fitness;
 
         Camera.main.transform.LookAt(monsters[j].member[0].part.transform);
     }
+
 
     void GenerateCode()
     {
