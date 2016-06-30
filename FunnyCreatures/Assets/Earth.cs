@@ -40,6 +40,8 @@ public class Earth : MonoBehaviour {
     public int minPart=1;
     public int maxPart=5;
 
+    public Text selectedCreatureText;
+
     public struct Node
     {
         public GameObject part;
@@ -98,7 +100,7 @@ public class Earth : MonoBehaviour {
                 node.part = GameObject.CreatePrimitive(PrimitiveType.Capsule);
                 if (i == 0)
                 {
-                    node.part.tag = "head";
+                    node.part.tag = "head"+j;
                     if (mat != null)
                         node.part.GetComponent<Renderer>().material = headMat;
                     node.part.transform.parent = monstersArray[j].transform;
@@ -226,6 +228,26 @@ public class Earth : MonoBehaviour {
 
         if (allnodes.Count > 0)
             CalculateHead();
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 100.0f))
+            {
+                int selectedHead = 0;
+                if(hit.collider.gameObject.tag.Substring(0, 4) == "head")
+                {
+                    int.TryParse(hit.collider.gameObject.tag.Substring(4, 1), out selectedHead);
+                    selectedCreatureText.text = monsters[selectedHead].code;
+                }
+                //if (hit.collider.gameObject.GetComponent<>)
+                //{
+
+                //}
+                //hit.collider.transform.tag = "select";
+            }
+        }
     }
 
     void FixedUpdate()
