@@ -67,6 +67,7 @@ public class Earth : MonoBehaviour {
         public float brainTimer;
         public List<Item> items;
         public bool miam;
+        public int nbMian;
     }
 
 
@@ -293,7 +294,9 @@ public class Earth : MonoBehaviour {
             {
                 Creature c = monsters[j];
                 c.miam = false;
-                c.fitness = 0;
+                c.nbMian++;
+                c.fitness -= 200*c.nbMian;
+                Mathf.Clamp(c.fitness, 0, c.fitness);
                 monsters[j] = c;
                 //cameraTarget = monsters[j].member[0].part.transform;
             }
