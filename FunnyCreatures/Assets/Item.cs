@@ -7,14 +7,17 @@ public class Item : MonoBehaviour
 
     public bool dangerous;
     public int stronger;
+    public bool actived = true;
 
     [SerializeField]
     Earth earth;
 
+    Transform startPosition;
+
     // Use this for initialization
     void Start()
     {
-
+        startPosition = transform;
     }
 
     // Update is called once per frame
@@ -32,7 +35,7 @@ public class Item : MonoBehaviour
             numberOfCollisions++;
             if (numberOfCollisions > 2)
             {
-                print("true");
+                //print("true");
                 for (int i = 0; i < earth.monsters.Count; i++)
                 {
                     for (int j = 0; j < earth.monsters[i].member.Count; j++)
@@ -46,9 +49,24 @@ public class Item : MonoBehaviour
                         }
                     }
                 }
-                print("end");
-                gameObject.SetActive(false);
+                //print("end");
+                actived = false;
+                GetComponent<MeshRenderer>().enabled = false;
+                GetComponent<SphereCollider>().enabled = false;
+                StartCoroutine(Respawn());
             }
         }
+    }
+
+    IEnumerator Respawn()
+    {
+       // gameObject.SetActive(false);
+        yield return new WaitForSeconds(5.0f);
+        GetComponent<SphereCollider>().enabled = true;
+        GetComponent<MeshRenderer>().enabled = true;
+        transform.position = startPosition.position;
+        transform.rotation = startPosition.rotation;
+        actived = true;
+        //gameObject.SetActive(true);
     }
 }

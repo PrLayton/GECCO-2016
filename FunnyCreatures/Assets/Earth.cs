@@ -34,6 +34,8 @@ public class Earth : MonoBehaviour {
 
     public Text nombreMutation;
     public Text[] textFitness;
+    public Text generationNumberText;
+    int generationNumber = 0;
 
     public int minPart=1;
     public int maxPart=5;
@@ -67,12 +69,27 @@ public class Earth : MonoBehaviour {
         //SetCreature();
     }
 
-    void MakeCreature()
+    void MakeCreature(bool first = true)
     {
         //Destroy(creature);
+        Debug.Log("GENEREATION " + generationNumber);
+        for (int i = 0; i < monsters.Count; i++)
+        {
+            for (int j = 0; j < monsters[i].member.Count; j++)
+            {
+                Destroy(monsters[i].member[j].part, 0);
+            }
+            monsters[i].member.Clear();
+        }
+        monsters.Clear();
 
         for (int j = 0; j < monstersArray.Length; j++)
         {
+            if (!first && j < codes.Count)
+            {
+                code = codes[j];
+            }
+
             List<Node> nodes2 = new List<Node>();
 
             for (int i = 0; i <= code.Length - 4; i += 4)
@@ -160,10 +177,13 @@ public class Earth : MonoBehaviour {
 
             allnodes.Add(nodes2);
 
-            if (generateCode)
-                GenerateCode();
-            else
-                code = Mutate(code, numberMutation);
+            if (first)
+            {
+                if (generateCode)
+                    GenerateCode();
+                else
+                    code = Mutate(code, numberMutation);
+            }
 
             Creature creature = new Creature();
             creature.id = j;
@@ -174,7 +194,7 @@ public class Earth : MonoBehaviour {
             monsters.Add(creature);
 
             codes.Add(code);
-            Debug.Log(code);
+            Debug.Log(j + "    " + code);
         }
     }
 
@@ -198,7 +218,9 @@ public class Earth : MonoBehaviour {
             numberMutation = int.Parse(nombreMutation.text);
             //MakeCreature();
             newGeneration();
-            
+            MakeCreature(false);
+            generationNumber += 1;
+            generationNumberText.text = generationNumber.ToString();
             timeCount = 0;
         }
 
@@ -264,7 +286,7 @@ public class Earth : MonoBehaviour {
         {
             for (int i = 0; i < itemsArray.Length; i++)
             {
-                if (Vector3.Distance(itemsArray[i].transform.position, monsters[j].member[0].part.transform.position) < 50f && itemsArray[i].gameObject.activeSelf)
+                if (Vector3.Distance(itemsArray[i].transform.position, monsters[j].member[0].part.transform.position) < 50f && itemsArray[i].actived)
                 {
                     if (!monsters[j].items.Contains(itemsArray[i]))
                     {
@@ -362,7 +384,7 @@ public class Earth : MonoBehaviour {
                 code += Random.Range(0,i/4);
         }
 
-        Debug.Log(code);
+        //Debug.Log(code);
     }
 
     public string Mutate(string adn,int nbMutation)
