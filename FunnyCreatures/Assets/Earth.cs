@@ -230,7 +230,8 @@ public class Earth : MonoBehaviour {
     }
 	*/
 
-	void Update () {
+    void Update()
+    {
         timeCount += Time.deltaTime;
         timeCountUI.text = ((int)(respawnTime - timeCount)).ToString();
         if (timeCount >= respawnTime)
@@ -251,11 +252,11 @@ public class Earth : MonoBehaviour {
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            Debug.Log("Mouse");
+            //Debug.Log("Mouse");
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 100.0f))
             {
                 int selectedHead = 0;
-               
+
                 if (hit.collider.gameObject.tag.Substring(0, 4) == "head")
                 {
                     int.TryParse(hit.collider.gameObject.tag.Substring(4, 1), out selectedHead);
@@ -267,6 +268,10 @@ public class Earth : MonoBehaviour {
                 //}
                 //hit.collider.transform.tag = "select";
             }
+        }
+        if (Input.GetMouseButtonDown(1))
+        {
+            selectedCreatureText.text = "";
         }
     }
 
