@@ -260,7 +260,7 @@ public class Earth : MonoBehaviour {
                 if (hit.collider.gameObject.tag.Substring(0, 4) == "head")
                 {
                     int.TryParse(hit.collider.gameObject.tag.Substring(4, 1), out selectedHead);
-                    selectedCreatureText.text = monsters[selectedHead].code;
+                    selectedCreatureText.text = "n° " + selectedHead + " " +  monsters[selectedHead].code;
                 }
                 //if (hit.collider.gameObject.GetComponent<>)
                 //{
