@@ -69,6 +69,7 @@ public class Earth : MonoBehaviour {
         public float brainTimer;
         public List<Item> items;
         public bool miam;
+        public int nbMian;
     }
 
 
@@ -229,29 +230,8 @@ public class Earth : MonoBehaviour {
     }
 	*/
 
-	void Update () {
-        if (Input.GetMouseButtonDown(0))
-        {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            Debug.Log("Mouse");
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 100.0f))
-            {
-                int selectedHead = 0;
-
-                if (hit.collider.gameObject.tag.Substring(0, 4) == "head")
-                {
-                    int.TryParse(hit.collider.gameObject.tag.Substring(4, 1), out selectedHead);
-                    selectedCreatureText.text = "n° : " + selectedHead + " " + monsters[selectedHead].code;
-                }
-                //if (hit.collider.gameObject.GetComponent<>)
-                //{
-
-                //}
-                //hit.collider.transform.tag = "select";
-            }
-        }
-
+    void Update()
+    {
         timeCount += Time.deltaTime;
         timeCountUI.text = ((int)(respawnTime - timeCount)).ToString();
         if (timeCount >= respawnTime)
@@ -268,7 +248,31 @@ public class Earth : MonoBehaviour {
         if (allnodes.Count > 0)
             CalculateHead();
 
-       
+        if (Input.GetMouseButtonDown(0))
+        {
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            //Debug.Log("Mouse");
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 100.0f))
+            {
+                int selectedHead = 0;
+
+                if (hit.collider.gameObject.tag.Substring(0, 4) == "head")
+                {
+                    int.TryParse(hit.collider.gameObject.tag.Substring(4, 1), out selectedHead);
+                    selectedCreatureText.text = monsters[selectedHead].code;
+                }
+                //if (hit.collider.gameObject.GetComponent<>)
+                //{
+
+                //}
+                //hit.collider.transform.tag = "select";
+            }
+        }
+        if (Input.GetMouseButtonDown(1))
+        {
+            selectedCreatureText.text = "";
+        }
     }
 
     void FixedUpdate()
@@ -319,7 +323,9 @@ public class Earth : MonoBehaviour {
             {
                 Creature c = monsters[j];
                 c.miam = false;
-                c.fitness = 0;
+                c.nbMian++;
+                c.fitness -= 200*c.nbMian;
+                Mathf.Clamp(c.fitness, 0, c.fitness);
                 monsters[j] = c;
                 //cameraTarget = monsters[j].member[0].part.transform;
             }
